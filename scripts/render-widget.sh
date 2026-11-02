@@ -6,5 +6,5 @@ out=.verify
 bin=src-tauri/target/widget/render-preview
 mkdir -p "$out" "$(dirname "$bin")"
 xcrun swiftc -O -target "$(uname -m)-apple-macosx14.0" -o "$bin" \
-  widget/Sources/Stage.swift widget/Sources/StageViews.swift widget/Preview/main.swift
+  widget/Sources/Stage.swift widget/Sources/StageViews.swift widget/Sources/AdvanceIntent.swift widget/Preview/main.swift
 "$bin" "$out"

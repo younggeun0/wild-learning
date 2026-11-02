@@ -47,6 +47,19 @@ impl Widget {
         unsafe { wl_reload_widgets() };
         Ok(())
     }
+
+    // 위젯의 다음 버튼(widget/Sources/AdvanceIntent.swift)이 남긴 요청을 지운 만큼 센다.
+    // 지우기는 한 번만 성공하므로 요청 하나가 두 번 넘기는 일은 없다
+    pub fn take_advance_requests(&self) -> usize {
+        let Ok(entries) = fs::read_dir(self.container.join("requests")) else {
+            return 0;
+        };
+        entries
+            .filter_map(|entry| entry.ok().map(|entry| entry.path()))
+            .filter(|path| path.extension().is_some_and(|ext| ext == "advance"))
+            .filter(|path| fs::remove_file(path).is_ok())
+            .count()
+    }
 }
 
 fn group_container() -> Option<PathBuf> {

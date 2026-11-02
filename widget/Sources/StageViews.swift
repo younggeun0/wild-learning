@@ -74,10 +74,20 @@ private struct StageSummary: View {
                 .foregroundStyle(palette.text)
             Spacer(minLength: 4)
             Text(stage.start, style: .timer)
-                .font(.system(size: 28, weight: .semibold).monospacedDigit())
+                .font(.system(size: 26, weight: .semibold).monospacedDigit())
                 .foregroundStyle(palette.text)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
+            Button(intent: AdvanceIntent()) {
+                Text("다음 →")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(palette.text)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 5)
+                    .background(palette.cell, in: Capsule())
+            }
+            .buttonStyle(.plain)
+            .padding(.top, 4)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
     }

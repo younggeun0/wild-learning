@@ -79,16 +79,30 @@ fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
             _ => {}
         })
         .build(app)?;
+    Ok(())
+}
 
-    let app = app.clone();
-    std::thread::spawn(move || loop {
-        std::thread::sleep(Duration::from_secs(1));
-        let stage = app.state::<TrayStage>().0.lock().unwrap().clone();
-        if let Some((label, since)) = stage {
-            refresh_tray(&app, &label, since);
+// 매초 메뉴 막대 시간을 고치고, 위젯의 다음 버튼 요청을 전역 단축키와 같은 advance 이벤트로 넘긴다
+fn spawn_ticker(app: AppHandle) {
+    std::thread::spawn(move || {
+        let widget = app.state::<Option<Widget>>();
+        // 앱이 꺼져 있을 때 누른 요청은 어느 단계에서 누른 것인지 알 수 없어 버린다
+        if let Some(widget) = widget.inner() {
+            widget.take_advance_requests();
+        }
+        loop {
+            std::thread::sleep(Duration::from_secs(1));
+            let stage = app.state::<TrayStage>().0.lock().unwrap().clone();
+            if let Some((label, since)) = stage {
+                refresh_tray(&app, &label, since);
+            }
+            if let Some(widget) = widget.inner() {
+                for _ in 0..widget.take_advance_requests() {
+                    let _ = app.emit_to("main", "advance", ());
+                }
+            }
         }
     });
-    Ok(())
 }
 
 fn main() {
@@ -108,6 +122,7 @@ fn main() {
                 Err(error) => eprintln!("global shortcut {ADVANCE_SHORTCUT} failed: {error}"),
             }
             setup_tray(app.handle())?;
+            spawn_ticker(app.handle().clone());
             Ok(())
         })
         .run(tauri::generate_context!())
