@@ -1,0 +1,21 @@
+name: WildLearningWidget
+options:
+  deploymentTarget:
+    macOS: "14.0"
+targets:
+  WildLearningWidget:
+    type: app-extension
+    platform: macOS
+    sources:
+      - path: Sources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.younggeun0.wild-learning.widget
+        INFOPLIST_FILE: Info.plist
+        CODE_SIGN_ENTITLEMENTS: WildLearningWidget.entitlements
+        SWIFT_VERSION: "6.0"
+        MARKETING_VERSION: "0.0.0"
+        CURRENT_PROJECT_VERSION: "0"
+    dependencies:
+      - sdk: WidgetKit.framework
+      - sdk: SwiftUI.framework
