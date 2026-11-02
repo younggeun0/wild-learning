@@ -43,7 +43,7 @@ fn show_guide(app: &AppHandle) {
         let _ = window.set_focus();
         return;
     }
-    let built = WebviewWindowBuilder::new(app, "guide", WebviewUrl::App("index.html?view=guide".into()))
+    let built = WebviewWindowBuilder::new(app, "guide", WebviewUrl::App("index.html".into()))
         .title("야생 학습 사용법")
         .inner_size(360.0, 380.0)
         .min_inner_size(240.0, 200.0)
