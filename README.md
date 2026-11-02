@@ -2,6 +2,10 @@
 
 김창준의 "야생 학습의 네 가지 모드"를 사분면으로 그려, 지금 주의가 어느 모드에 있는지 보여주는 macOS 위젯 앱과 웹앱.
 
+<img src="docs/screenshot.png" width="320" alt="옵션 칸이 초록으로 칠해진 야생학습 위젯">
+
+김창준, 『야생 학습』(인사이트, 2026)의 개념을 바탕으로 만든 개인 프로젝트다. 저자·출판사와는 관계가 없다. 아이콘은 책 표지의 분위기를 따라 새로 그렸다.
+
 - 지금 있는 사분면이 칠해지고 단계 이름이 크게 보인다. 액션·관찰·해석은 한 단계(액관해)로 묶이고, 그 안의 정거장은 작게 표시된다. 시간은 화면에 띄우지 않는다. 시간이 보이면 주의가 모드보다 시계로 가기 때문이다. 이동 시각은 세션 기록에 남는다
 - 주의는 옵션 → 가설 → 액션 → 관찰 → 해석 → 지도 → 옵션 순서로 움직인다. Space는 액션·관찰·해석 고리를 한 번만 돌고 지도로 넘어간다
 - 사분면을 누르면 그 모드로 간다. 고리를 다시 돌고 싶으면 액관해 안의 정거장 이름을 누른다
@@ -45,4 +49,9 @@ npm run build:web  # 웹앱을 dist에 빌드 (Vercel용, npx vite preview로 �
 알림센터 위젯은 `widget/`의 WidgetKit 확장이다. 앱과 앱 그룹 컨테이너의 `stage.json`(지금 단계)과 `requests/*.advance`(다음 버튼 요청)로 주고받는다. 확장이 들어 있지 않은 `npm run dev` 빌드에서는 이 연동이 꺼진다. 알림센터에 올리지 않고 위젯 모양만 볼 때는 `scripts/render-widget.sh`가 `.verify/widget-*.png`로 그려 준다.
 
 - 앱 묶음 파일 이름(`productName`)은 영문 `wild-learning`으로 둔다. 경로에 한글이 들어가면 ExtensionKit이 위젯 확장을 찾지 못해 위젯이 갱신되지 않는다. 보이는 이름 `야생학습`은 `src-tauri/Info.plist`와 `src-tauri/InfoPlist.strings`가 정한다
+- 직접 서명해 빌드하려면 앱 그룹 ID 앞의 Team ID(`TFLHLW3C9D`)를 자기 Team ID로 바꾼다. `src-tauri/src/widget.rs`, `src-tauri/wild-learning.entitlements`, `widget/WildLearningWidget.entitlements`, `widget/Sources/Stage.swift` 네 곳이 같은 값을 쓴다
 - 앱 아이콘 원본은 `scripts/icon.html`이다. 파일 안 주석대로 1024px PNG를 만들고 `npx tauri icon`으로 `src-tauri/icons`를 다시 만든다
+
+### 라이선스
+
+[MIT](LICENSE). 웹 글꼴 Pretendard는 SIL Open Font License 1.1을 따른다.
