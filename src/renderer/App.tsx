@@ -72,6 +72,8 @@ export default function App() {
   const since = stageSince(session)
   const elapsed = formatDuration(now - since)
 
+  useEffect(() => window.wildLearning?.setTrayStage(label, since), [label, since])
+
   return (
     <main className="group/widget fixed inset-0 flex flex-col overflow-hidden rounded-xl bg-stone-50 text-stone-600 dark:bg-stone-900 dark:text-stone-300">
       <header data-tauri-drag-region className="flex h-6 shrink-0 items-center gap-2 px-2.5 text-[11px] tabular-nums">
