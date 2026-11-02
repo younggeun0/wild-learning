@@ -1,5 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod widget;
+
 use std::sync::Mutex;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
@@ -7,6 +9,7 @@ use tauri::menu::{Menu, MenuItem};
 use tauri::tray::TrayIconBuilder;
 use tauri::{AppHandle, Emitter, Manager, State, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
+use widget::Widget;
 
 const ADVANCE_SHORTCUT: &str = "CmdOrCtrl+Shift+Space";
 const TRAY_ID: &str = "main";
@@ -16,9 +19,12 @@ const TRAY_ID: &str = "main";
 struct TrayStage(Mutex<Option<(String, f64)>>);
 
 #[tauri::command]
-fn set_tray_stage(app: AppHandle, stage: State<TrayStage>, label: String, since: f64) {
+fn set_tray_stage(app: AppHandle, stage: State<TrayStage>, widget: State<Option<Widget>>, label: String, since: f64) {
     *stage.0.lock().unwrap() = Some((label.clone(), since));
     refresh_tray(&app, &label, since);
+    if let Some(widget) = widget.inner() {
+        widget.reload();
+    }
 }
 
 fn refresh_tray(app: &AppHandle, label: &str, since: f64) {
@@ -89,6 +95,7 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .manage(TrayStage::default())
+        .manage(Widget::detect())
         .invoke_handler(tauri::generate_handler![set_tray_stage, open_guide])
         .setup(|app| {
             let registered = app.global_shortcut().on_shortcut(ADVANCE_SHORTCUT, |app, _shortcut, event| {
