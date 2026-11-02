@@ -21,6 +21,34 @@ declare global {
   }
 }
 
+let latestStage = 0
+
+// 메뉴 막대용 배지: 초록 바탕에 흰 글자. 2배 해상도로 그리면 macOS가 18pt 높이에 맞춰 줄인다
+async function drawBadge(label: string): Promise<number[]> {
+  await document.fonts.ready
+  const scale = 2
+  const height = 18 * scale
+  const font = `600 ${12.5 * scale}px Pretendard, -apple-system, sans-serif`
+  const canvas = document.createElement('canvas')
+  const ctx = canvas.getContext('2d')!
+  ctx.font = font
+  const padding = 7 * scale
+  canvas.width = Math.ceil(ctx.measureText(label).width) + padding * 2
+  canvas.height = height
+  ctx.fillStyle = '#3a8f5c'
+  ctx.beginPath()
+  ctx.roundRect(0, 0, canvas.width, height, 5 * scale)
+  ctx.fill()
+  ctx.font = font
+  ctx.fillStyle = '#ffffff'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.fillText(label, canvas.width / 2, height / 2 + scale)
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'))
+  if (!blob) throw new Error('badge render failed')
+  return Array.from(new Uint8Array(await blob.arrayBuffer()))
+}
+
 // 웹 빌드에서는 window.wildLearning이 없다
 if (window.__TAURI_INTERNALS__) {
   window.wildLearning = {
@@ -38,7 +66,12 @@ if (window.__TAURI_INTERNALS__) {
       getCurrentWindow().close().catch(console.error)
     },
     setStage(label, stage) {
-      invoke('set_stage', { label, stage }).catch(console.error)
+      const id = ++latestStage
+      drawBadge(label)
+        .then((badge) => {
+          if (id === latestStage) return invoke('set_stage', { badge, stage })
+        })
+        .catch(console.error)
     },
   }
 }

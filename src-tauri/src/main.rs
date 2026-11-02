@@ -15,9 +15,12 @@ const ADVANCE_SHORTCUT: &str = "CmdOrCtrl+Shift+Space";
 const TRAY_ID: &str = "main";
 
 #[tauri::command]
-fn set_stage(app: AppHandle, widget: State<Option<Widget>>, label: String, stage: Stage) {
-    if let Some(tray) = app.tray_by_id(TRAY_ID) {
-        let _ = tray.set_title(Some(label));
+fn set_stage(app: AppHandle, widget: State<Option<Widget>>, badge: Vec<u8>, stage: Stage) {
+    // 메뉴 막대 제목은 글자색·배경을 못 바꿔서, renderer가 그린 초록 배지 PNG를 아이콘으로 단다
+    if let (Some(tray), Ok(image)) = (app.tray_by_id(TRAY_ID), tauri::image::Image::from_bytes(&badge)) {
+        let _ = tray.set_icon(Some(image));
+        let _ = tray.set_icon_as_template(false);
+        let _ = tray.set_title(None::<&str>);
     }
     if let Some(Err(error)) = widget.inner().as_ref().map(|widget| widget.publish(&stage)) {
         eprintln!("widget stage write failed: {error}");
