@@ -1,0 +1,24 @@
+<!doctype html>
+<!-- 앱 아이콘 원본. 『야생 학습』 표지의 손으로 오린 초록 도형 느낌을 따랐다.
+     Chrome --headless=new --default-background-color=00000000 --window-size=1024,1024 --screenshot로 1024px PNG를 만들고 npx tauri icon으로 src-tauri/icons를 다시 만든다 --><html><body style="margin:0;background:transparent">
+<svg id="s" xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <filter id="cut" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="16" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#000" flood-opacity="0.22"/>
+    </filter>
+  </defs>
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="#FBFAF4" filter="url(#shadow)"/>
+  <g fill="#009845" filter="url(#cut)">
+    <path d="M 295.9 433.3 A 230 230 0 1 1 364.2 688.2" fill="none" stroke="#009845" stroke-width="88" stroke-linecap="round"/>
+    <polygon points="268,610 296,770 430,612"/>
+    <polygon id="star"/>
+  </g>
+</svg>
+<script>
+const pts=[];for(let i=0;i<16;i++){const a=-Math.PI/2+i*Math.PI/8,r=i%2?40:108;pts.push((512+r*Math.cos(a)).toFixed(1)+','+(512+r*Math.sin(a)).toFixed(1))}
+document.getElementById('star').setAttribute('points',pts.join(' '))
+</script></body></html>

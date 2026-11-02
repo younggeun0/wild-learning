@@ -37,7 +37,7 @@ fn show_guide(app: &AppHandle) {
         return;
     }
     let built = WebviewWindowBuilder::new(app, "guide", WebviewUrl::App("index.html".into()))
-        .title("야생 학습 사용법")
+        .title("야생학습 사용법")
         .inner_size(360.0, 380.0)
         .min_inner_size(240.0, 200.0)
         .always_on_top(true)
@@ -74,7 +74,7 @@ fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
     let guide = MenuItem::with_id(app, "guide", "사용법", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "종료", true, None::<&str>)?;
     TrayIconBuilder::with_id(TRAY_ID)
-        .title("야생 학습")
+        .title("야생학습")
         .menu(&Menu::with_items(app, &[&on_top, &guide, &quit])?)
         .on_menu_event(move |app, event| match event.id().as_ref() {
             "on_top" => {

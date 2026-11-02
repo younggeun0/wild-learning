@@ -11,7 +11,7 @@ if [ -z "$identity" ]; then
   exit 1
 fi
 
-app=src-tauri/target/release/bundle/macos/wild-learning.app
+app=src-tauri/target/release/bundle/macos/야생학습.app
 appex=src-tauri/target/widget/Build/Products/Release/WildLearningWidget.appex
 dmg=src-tauri/target/release/bundle/dmg/wild-learning_${version}_$(uname -m).dmg
 
@@ -47,7 +47,7 @@ staging=$(mktemp -d)
 cp -R "$app" "$staging/"
 ln -s /Applications "$staging/Applications"
 mkdir -p "$(dirname "$dmg")"
-hdiutil create -quiet -volname wild-learning -srcfolder "$staging" -format UDZO -ov "$dmg"
+hdiutil create -quiet -volname 야생학습 -srcfolder "$staging" -format UDZO -ov "$dmg"
 rm -rf "$staging"
 codesign --force --timestamp --sign "$identity" "$dmg"
 

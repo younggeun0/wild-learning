@@ -37,7 +37,7 @@ struct WildLearningWidget: Widget {
         StaticConfiguration(kind: "WildLearningStage", provider: StageProvider()) { entry in
             StageEntryView(entry: entry)
         }
-        .configurationDisplayName("야생 학습")
+        .configurationDisplayName("야생학습")
         .description("지금 주의가 머문 모드")
         .supportedFamilies([.systemSmall, .systemMedium])
     }

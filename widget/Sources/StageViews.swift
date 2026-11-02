@@ -51,7 +51,7 @@ struct StageWidgetView: View {
             }
         } else {
             VStack(spacing: 6) {
-                Text("야생 학습").font(.system(size: 15, weight: .bold)).foregroundStyle(palette.text)
+                Text("야생학습").font(.system(size: 15, weight: .bold)).foregroundStyle(palette.text)
                 Text("앱을 실행해 주세요").font(.system(size: 12)).foregroundStyle(palette.muted)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
