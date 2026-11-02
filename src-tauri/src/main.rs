@@ -2,9 +2,10 @@
 
 mod widget;
 
+use std::path::PathBuf;
 use std::time::Duration;
 
-use tauri::menu::{Menu, MenuItem};
+use tauri::menu::{CheckMenuItem, Menu, MenuItem};
 use tauri::tray::TrayIconBuilder;
 use tauri::{AppHandle, Emitter, Manager, State, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
@@ -47,18 +48,39 @@ fn show_guide(app: &AppHandle) {
     }
 }
 
+// 끈 상태를 다음 실행에도 유지한다. 파일이 있으면 꺼진 상태
+fn on_top_off_path(app: &AppHandle) -> Option<PathBuf> {
+    Some(app.path().app_config_dir().ok()?.join("always_on_top_off"))
+}
+
+fn is_on_top(app: &AppHandle) -> bool {
+    !on_top_off_path(app).is_some_and(|path| path.exists())
+}
+
+fn apply_on_top(app: &AppHandle, value: bool) {
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.set_always_on_top(value);
+    }
+    let Some(path) = on_top_off_path(app) else { return };
+    let _ = if value {
+        std::fs::remove_file(path)
+    } else {
+        std::fs::create_dir_all(path.parent().unwrap()).and_then(|_| std::fs::write(path, ""))
+    };
+}
+
 fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
-    let toggle = MenuItem::with_id(app, "toggle", "위젯 보이기/숨기기", true, None::<&str>)?;
+    let on_top = CheckMenuItem::with_id(app, "on_top", "항상 위에 표시", true, is_on_top(app), None::<&str>)?;
     let guide = MenuItem::with_id(app, "guide", "사용법", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "종료", true, None::<&str>)?;
     TrayIconBuilder::with_id(TRAY_ID)
         .title("야생 학습")
-        .menu(&Menu::with_items(app, &[&toggle, &guide, &quit])?)
-        .on_menu_event(|app, event| match event.id().as_ref() {
-            "toggle" => {
-                if let Some(window) = app.get_webview_window("main") {
-                    let _ = if window.is_visible().unwrap_or(true) { window.hide() } else { window.show() };
-                }
+        .menu(&Menu::with_items(app, &[&on_top, &guide, &quit])?)
+        .on_menu_event(move |app, event| match event.id().as_ref() {
+            "on_top" => {
+                let value = !is_on_top(app);
+                apply_on_top(app, value);
+                let _ = on_top.set_checked(value);
             }
             "guide" => show_guide(app),
             "quit" => app.exit(0),
@@ -100,6 +122,7 @@ fn main() {
                 Ok(()) => eprintln!("global shortcut registered: {ADVANCE_SHORTCUT}"),
                 Err(error) => eprintln!("global shortcut {ADVANCE_SHORTCUT} failed: {error}"),
             }
+            apply_on_top(app.handle(), is_on_top(app.handle()));
             setup_tray(app.handle())?;
             spawn_request_poller(app.handle().clone());
             Ok(())
