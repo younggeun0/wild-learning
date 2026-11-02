@@ -1,15 +1,30 @@
 export type Mode = 'option' | 'hypothesis' | 'action' | 'observation' | 'interpretation' | 'map'
 
-export type Station = { mode: Mode; label: string; x: number; y: number }
+export type Quadrant = 'option' | 'hypothesis' | 'loop' | 'map'
 
-// Space 순서이자 보드 좌표(Board의 viewBox 기준)
+export const ROWS = ['미래', '과거·현재'] as const
+export const COLS = ['분산', '집중'] as const
+
+export const QUADRANTS: Record<
+  Quadrant,
+  { label: string; row: (typeof ROWS)[number]; col: (typeof COLS)[number]; color: string }
+> = {
+  option: { label: '옵션', row: '미래', col: '분산', color: '#0ea5e9' },
+  hypothesis: { label: '가설', row: '미래', col: '집중', color: '#8b5cf6' },
+  loop: { label: '실행 루프', row: '과거·현재', col: '집중', color: '#f59e0b' },
+  map: { label: '지도', row: '과거·현재', col: '분산', color: '#10b981' },
+}
+
+export type Station = { mode: Mode; label: string; quadrant: Quadrant }
+
+// Space 순서
 export const STATIONS: readonly Station[] = [
-  { mode: 'option', label: '옵션', x: 160, y: 70 },
-  { mode: 'hypothesis', label: '가설', x: 285, y: 70 },
-  { mode: 'action', label: '액션', x: 268, y: 192 },
-  { mode: 'observation', label: '관찰', x: 331, y: 165 },
-  { mode: 'interpretation', label: '해석', x: 331, y: 219 },
-  { mode: 'map', label: '지도', x: 160, y: 192 },
+  { mode: 'option', label: '옵션', quadrant: 'option' },
+  { mode: 'hypothesis', label: '가설', quadrant: 'hypothesis' },
+  { mode: 'action', label: '액션', quadrant: 'loop' },
+  { mode: 'observation', label: '관찰', quadrant: 'loop' },
+  { mode: 'interpretation', label: '해석', quadrant: 'loop' },
+  { mode: 'map', label: '지도', quadrant: 'map' },
 ]
 
 export type Visit = { mode: Mode; at: number }
@@ -26,12 +41,13 @@ export const current = (s: Session): Visit => s.visits[s.visits.length - 1]
 
 export const station = (mode: Mode): Station => STATIONS.find((st) => st.mode === mode)!
 
+export const nextStation = (mode: Mode): Station =>
+  STATIONS[(STATIONS.findIndex((st) => st.mode === mode) + 1) % STATIONS.length]
+
 export function reduce(s: Session, a: Action): Session {
   switch (a.type) {
-    case 'next': {
-      const i = STATIONS.findIndex((st) => st.mode === current(s).mode)
-      return { visits: [...s.visits, { mode: STATIONS[(i + 1) % STATIONS.length].mode, at: a.at }] }
-    }
+    case 'next':
+      return { visits: [...s.visits, { mode: nextStation(current(s).mode).mode, at: a.at }] }
     case 'undo':
       return s.visits.length > 1 ? { visits: s.visits.slice(0, -1) } : s
     case 'jump':
