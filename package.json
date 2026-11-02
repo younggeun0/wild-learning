@@ -12,7 +12,7 @@
   "type": "module",
   "scripts": {
     "dev": "tauri dev",
-    "build": "tauri build --bundles app,dmg",
+    "build": "scripts/build-mac.sh",
     "build:web": "vite build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
