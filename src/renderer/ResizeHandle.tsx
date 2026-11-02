@@ -28,7 +28,7 @@ export default function ResizeHandle() {
       onPointerCancel={onPointerUp}
       className="absolute right-1 bottom-1 h-3 w-3 cursor-nwse-resize opacity-0 transition-opacity group-hover/widget:opacity-100"
     >
-      <span className="absolute right-0.5 bottom-0.5 h-2 w-2 rounded-br-sm border-r-2 border-b-2 border-stone-400" />
+      <span className="absolute right-0.5 bottom-0.5 h-2 w-2 rounded-br-sm border-r-2 border-b-2 border-stone-400 dark:border-stone-500" />
     </div>
   )
 }

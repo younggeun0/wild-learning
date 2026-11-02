@@ -59,13 +59,13 @@ export default function App() {
   const totals = dwell(session, now)
 
   return (
-    <main className="group/widget fixed inset-0 flex flex-col overflow-hidden rounded-xl bg-stone-50 text-stone-600">
+    <main className="group/widget fixed inset-0 flex flex-col overflow-hidden rounded-xl bg-stone-50 text-stone-600 dark:bg-stone-900 dark:text-stone-300">
       <header data-tauri-drag-region className="flex h-6 shrink-0 items-center gap-2 px-2.5 text-[11px] tabular-nums">
         <div className="group relative" data-testid="stats">
           <span>
             {laps(session)}바퀴 · {station(here.mode).label} {formatDuration(now - here.at)}
           </span>
-          <dl className="absolute top-5 left-0 z-10 hidden grid-cols-[auto_auto] gap-x-3 rounded-md bg-white/95 px-2.5 py-1.5 shadow-md group-hover:grid">
+          <dl className="absolute top-5 left-0 z-10 hidden grid-cols-[auto_auto] gap-x-3 rounded-md bg-white/95 px-2.5 dark:bg-stone-800/95 py-1.5 shadow-md group-hover:grid">
             {STATIONS.map((st) => (
               <div key={st.mode} className="contents">
                 <dt>{st.label}</dt>
@@ -78,7 +78,7 @@ export default function App() {
         <button
           type="button"
           title="새 세션 (기록 지우기)"
-          className="cursor-pointer rounded px-1 text-stone-400 hover:text-stone-700"
+          className="cursor-pointer rounded px-1 text-stone-400 hover:text-stone-700 dark:text-stone-500 dark:hover:text-stone-200"
           onClick={(event) => {
             event.currentTarget.blur()
             dispatch({ type: 'reset', at: Date.now() })
