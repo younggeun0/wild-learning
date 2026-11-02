@@ -60,32 +60,17 @@ export function reduce(s: Session, a: Action): Session {
 export const laps = (s: Session): number =>
   s.visits.filter((v, i) => i > 0 && v.mode === 'option' && s.visits[i - 1].mode === 'map').length
 
-export function stageSince(s: Session): number {
-  const quadrant = station(current(s).mode).quadrant
-  let i = s.visits.length - 1
-  while (i > 0 && station(s.visits[i - 1].mode).quadrant === quadrant) i--
-  return s.visits[i].at
-}
-
 // 메뉴 막대와 macOS 위젯이 보는 지금 단계. Rust가 그대로 stage.json에 쓴다
-export type Stage = { mode: Mode; stage: string; substep: string | null; since: number }
+export type Stage = { mode: Mode; stage: string; substep: string | null }
 
 export function stageOf(s: Session): Stage {
   const { mode } = current(s)
   const { quadrant, label } = station(mode)
   const substep = stepsOf(quadrant).length > 1 ? label : null
-  return { mode, stage: QUADRANTS[quadrant].label, substep, since: stageSince(s) }
+  return { mode, stage: QUADRANTS[quadrant].label, substep }
 }
 
 export const stageLabel = ({ stage, substep }: Stage): string => (substep ? `${stage}·${substep}` : stage)
-
-export function dwell(s: Session, now: number): Record<Mode, number> {
-  const total = Object.fromEntries(STATIONS.map((st) => [st.mode, 0])) as Record<Mode, number>
-  s.visits.forEach((v, i) => {
-    total[v.mode] += (s.visits[i + 1]?.at ?? now) - v.at
-  })
-  return total
-}
 
 export function parseSession(raw: unknown): Session | null {
   const visits = (raw as Session | null)?.visits

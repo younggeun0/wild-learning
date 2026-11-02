@@ -5,7 +5,7 @@ type JumpProps = { here: Station; onJump: (mode: Mode) => void }
 
 const QUADRANT_ORDER = Object.keys(QUADRANTS) as Quadrant[]
 
-function Cell({ quadrant, here, elapsed, onJump }: JumpProps & { quadrant: Quadrant; elapsed: string }) {
+function Cell({ quadrant, here, onJump }: JumpProps & { quadrant: Quadrant }) {
   const { label, row, col } = QUADRANTS[quadrant]
   const active = here.quadrant === quadrant
   const steps = stepsOf(quadrant)
@@ -27,14 +27,6 @@ function Cell({ quadrant, here, elapsed, onJump }: JumpProps & { quadrant: Quadr
       >
         {label}
       </span>
-      {active && (
-        <span
-          data-testid="stage-time"
-          className="text-[clamp(12px,7.5vmin,36px)] leading-none font-semibold tabular-nums"
-        >
-          {elapsed}
-        </span>
-      )}
       {steps.length > 1 && (
         <span className="flex gap-1 text-[clamp(9px,3vmin,13px)] leading-none">
           {steps.map((st, i) => (
@@ -58,7 +50,7 @@ function Cell({ quadrant, here, elapsed, onJump }: JumpProps & { quadrant: Quadr
   )
 }
 
-function Grid({ here, elapsed, onJump }: JumpProps & { elapsed: string }) {
+function Grid({ here, onJump }: JumpProps) {
   const axis = 'flex items-center justify-center text-[10px] text-stone-400 dark:text-stone-500'
   return (
     <div className="grid min-h-0 flex-1 grid-cols-[14px_1fr_1fr] grid-rows-[1fr_1fr_14px] gap-1 compact:hidden">
@@ -77,7 +69,7 @@ function Grid({ here, elapsed, onJump }: JumpProps & { elapsed: string }) {
         </span>
       ))}
       {QUADRANT_ORDER.map((q) => (
-        <Cell key={q} quadrant={q} here={here} elapsed={elapsed} onJump={onJump} />
+        <Cell key={q} quadrant={q} here={here} onJump={onJump} />
       ))}
     </div>
   )
@@ -123,19 +115,11 @@ function Strip({ here, onJump }: JumpProps) {
   )
 }
 
-export default function Board({
-  mode,
-  elapsed,
-  onJump,
-}: {
-  mode: Mode
-  elapsed: string
-  onJump: (mode: Mode) => void
-}) {
+export default function Board({ mode, onJump }: { mode: Mode; onJump: (mode: Mode) => void }) {
   const here = station(mode)
   return (
     <div className="flex h-full flex-col gap-1">
-      <Grid here={here} elapsed={elapsed} onJump={onJump} />
+      <Grid here={here} onJump={onJump} />
       <Strip here={here} onJump={onJump} />
       <p className="shrink-0 text-center text-[11px] leading-none text-stone-400 dark:text-stone-500">
         Space → <b className="font-semibold text-stone-700 dark:text-stone-200">{nextStation(mode).label}</b>

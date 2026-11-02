@@ -2,8 +2,7 @@
 
 mod widget;
 
-use std::sync::Mutex;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::Duration;
 
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::TrayIconBuilder;
@@ -14,26 +13,13 @@ use widget::{Stage, Widget};
 const ADVANCE_SHORTCUT: &str = "CmdOrCtrl+Shift+Space";
 const TRAY_ID: &str = "main";
 
-// renderer는 단계가 바뀔 때만 알려 준다. 웹뷰가 숨겨지거나 느려져도 메뉴 막대 시간은 여기서 계속 센다
-#[derive(Default)]
-struct TrayStage(Mutex<Option<(String, f64)>>);
-
 #[tauri::command]
-fn set_stage(app: AppHandle, tray: State<TrayStage>, widget: State<Option<Widget>>, label: String, stage: Stage) {
-    *tray.0.lock().unwrap() = Some((label.clone(), stage.since));
-    refresh_tray(&app, &label, stage.since);
+fn set_stage(app: AppHandle, widget: State<Option<Widget>>, label: String, stage: Stage) {
+    if let Some(tray) = app.tray_by_id(TRAY_ID) {
+        let _ = tray.set_title(Some(label));
+    }
     if let Some(Err(error)) = widget.inner().as_ref().map(|widget| widget.publish(&stage)) {
         eprintln!("widget stage write failed: {error}");
-    }
-}
-
-fn refresh_tray(app: &AppHandle, label: &str, since: f64) {
-    let now = SystemTime::now().duration_since(UNIX_EPOCH).map_or(since, |d| d.as_millis() as f64);
-    let s = ((now - since) / 1000.0).max(0.0) as u64;
-    let (h, m, sec) = (s / 3600, s / 60 % 60, s % 60);
-    let title = if h > 0 { format!("{label} {h}:{m:02}:{sec:02}") } else { format!("{label} {m}:{sec:02}") };
-    if let Some(tray) = app.tray_by_id(TRAY_ID) {
-        let _ = tray.set_title(Some(title));
     }
 }
 
@@ -82,24 +68,18 @@ fn setup_tray(app: &AppHandle) -> tauri::Result<()> {
     Ok(())
 }
 
-// 매초 메뉴 막대 시간을 고치고, 위젯의 다음 버튼 요청을 전역 단축키와 같은 advance 이벤트로 넘긴다
-fn spawn_ticker(app: AppHandle) {
+// 위젯의 다음 버튼 요청을 매초 가져가 전역 단축키와 같은 advance 이벤트로 넘긴다
+fn spawn_request_poller(app: AppHandle) {
     std::thread::spawn(move || {
-        let widget = app.state::<Option<Widget>>();
+        let Some(widget) = app.state::<Option<Widget>>().inner() else {
+            return;
+        };
         // 앱이 꺼져 있을 때 누른 요청은 어느 단계에서 누른 것인지 알 수 없어 버린다
-        if let Some(widget) = widget.inner() {
-            widget.take_advance_requests();
-        }
+        widget.take_advance_requests();
         loop {
             std::thread::sleep(Duration::from_secs(1));
-            let stage = app.state::<TrayStage>().0.lock().unwrap().clone();
-            if let Some((label, since)) = stage {
-                refresh_tray(&app, &label, since);
-            }
-            if let Some(widget) = widget.inner() {
-                for _ in 0..widget.take_advance_requests() {
-                    let _ = app.emit_to("main", "advance", ());
-                }
+            for _ in 0..widget.take_advance_requests() {
+                let _ = app.emit_to("main", "advance", ());
             }
         }
     });
@@ -108,7 +88,6 @@ fn spawn_ticker(app: AppHandle) {
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
-        .manage(TrayStage::default())
         .manage(Widget::detect())
         .invoke_handler(tauri::generate_handler![set_stage, open_guide])
         .setup(|app| {
@@ -122,7 +101,7 @@ fn main() {
                 Err(error) => eprintln!("global shortcut {ADVANCE_SHORTCUT} failed: {error}"),
             }
             setup_tray(app.handle())?;
-            spawn_ticker(app.handle().clone());
+            spawn_request_poller(app.handle().clone());
             Ok(())
         })
         .build(tauri::generate_context!())

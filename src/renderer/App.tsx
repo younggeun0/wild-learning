@@ -4,10 +4,8 @@ import Board from './Board'
 import { GuideOverlay } from './Guide'
 import ResizeHandle from './ResizeHandle'
 import {
-  STATIONS,
   type Session,
   current,
-  dwell,
   laps,
   newSession,
   parseSession,
@@ -43,24 +41,8 @@ function load(): Session {
   }
 }
 
-function formatDuration(ms: number) {
-  const s = Math.max(0, Math.floor(ms / 1000))
-  const mmss = `${Math.floor(s / 60) % 60}:${String(s % 60).padStart(2, '0')}`
-  return s >= 3600 ? `${Math.floor(s / 3600)}:${mmss.padStart(5, '0')}` : mmss
-}
-
-function useNow() {
-  const [now, setNow] = useState(Date.now)
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(id)
-  }, [])
-  return now
-}
-
 export default function App() {
   const [session, dispatch] = useReducer(reduce, undefined, load)
-  const now = useNow()
   const [guideOpen, setGuideOpen] = useState(false)
 
   useEffect(() => {
@@ -102,32 +84,17 @@ export default function App() {
   useEffect(() => window.wildLearning?.onAdvance(() => dispatch({ type: 'next', at: Date.now() })), [])
 
   const here = current(session)
-  const totals = dwell(session, now)
   const stage = useMemo(() => stageOf(session), [session])
   const label = stageLabel(stage)
-  const elapsed = formatDuration(now - stage.since)
 
   useEffect(() => window.wildLearning?.setStage(label, stage), [label, stage])
 
   return (
     <main className="group/widget fixed inset-0 flex flex-col overflow-hidden rounded-xl bg-stone-50 text-stone-600 dark:bg-stone-900 dark:text-stone-300">
       <header data-tauri-drag-region className="flex h-6 shrink-0 items-center gap-2 px-2.5 text-[11px] tabular-nums">
-        <div className="group relative flex min-w-0 items-baseline gap-1.5" data-testid="stats">
-          <span className="truncate">
-            {laps(session)}바퀴 · {label}
-          </span>
-          <span className="hidden shrink-0 text-[15px] font-bold text-stone-800 compact:inline dark:text-stone-100">
-            {elapsed}
-          </span>
-          <dl className="absolute top-5 left-0 z-10 hidden grid-cols-[auto_auto] gap-x-3 rounded-md bg-white/95 px-2.5 dark:bg-stone-800/95 py-1.5 shadow-md group-hover:grid">
-            {STATIONS.map((st) => (
-              <div key={st.mode} className="contents">
-                <dt>{st.label}</dt>
-                <dd className="text-right">{formatDuration(totals[st.mode])}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
+        <span className="truncate" data-testid="stats">
+          {laps(session)}바퀴 · {label}
+        </span>
         <div data-tauri-drag-region className="flex-1 self-stretch" />
         <button
           type="button"
@@ -153,7 +120,7 @@ export default function App() {
         </button>
       </header>
       <div className="min-h-0 flex-1 px-1 pb-1">
-        <Board mode={here.mode} elapsed={elapsed} onJump={(mode) => dispatch({ type: 'jump', mode, at: Date.now() })} />
+        <Board mode={here.mode} onJump={(mode) => dispatch({ type: 'jump', mode, at: Date.now() })} />
       </div>
       {window.wildLearning && <ResizeHandle />}
       {guideOpen && <GuideOverlay onClose={() => setGuideOpen(false)} />}

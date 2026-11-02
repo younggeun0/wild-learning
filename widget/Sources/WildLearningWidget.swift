@@ -6,7 +6,7 @@ struct StageEntry: TimelineEntry {
     let stage: Stage?
 }
 
-// 시간은 Text(.timer)가 스스로 센다. 단계가 바뀌면 앱이 다시 읽으라고 알려 주므로 새 타임라인을 예약하지 않는다
+// 단계가 바뀌면 앱이 다시 읽으라고 알려 주므로 새 타임라인을 예약하지 않는다
 struct StageProvider: TimelineProvider {
     func placeholder(in context: Context) -> StageEntry {
         StageEntry(date: .now, stage: .sample)
@@ -38,7 +38,7 @@ struct WildLearningWidget: Widget {
             StageEntryView(entry: entry)
         }
         .configurationDisplayName("야생 학습")
-        .description("지금 주의가 머문 모드와 그 단계에 머문 시간")
+        .description("지금 주의가 머문 모드")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }

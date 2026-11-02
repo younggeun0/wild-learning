@@ -20,7 +20,6 @@ pub struct Stage {
     pub mode: String,
     pub stage: String,
     pub substep: Option<String>,
-    pub since: f64,
 }
 
 // macOS 위젯(widget/)과 앱 그룹 컨테이너로 주고받는다
@@ -48,7 +47,7 @@ impl Widget {
         Ok(())
     }
 
-    // 앱이 꺼지면 위젯은 시간을 멈추고 "앱을 실행해 주세요"를 보인다. 다시 켜면 renderer가 set_stage로 새로 쓴다
+    // 앱이 꺼지면 위젯은 지난 단계 대신 "앱을 실행해 주세요"를 보인다. 다시 켜면 renderer가 set_stage로 새로 쓴다
     pub fn clear(&self) {
         let _ = fs::remove_file(self.container.join("stage.json"));
         unsafe { wl_reload_widgets() };

@@ -10,9 +10,6 @@ enum AppGroup {
 struct Stage: Decodable, Equatable {
     let stage: String
     let substep: String?
-    let since: Double
-
-    var start: Date { Date(timeIntervalSince1970: since / 1000) }
 
     static func load() -> Stage? {
         guard let url = AppGroup.container?.appendingPathComponent("stage.json"),
@@ -20,5 +17,5 @@ struct Stage: Decodable, Equatable {
         return try? JSONDecoder().decode(Stage.self, from: data)
     }
 
-    static let sample = Stage(stage: "액관해", substep: "관찰", since: (Date.now.timeIntervalSince1970 - 724) * 1000)
+    static let sample = Stage(stage: "액관해", substep: "관찰")
 }

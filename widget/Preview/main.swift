@@ -4,8 +4,8 @@ import WidgetKit
 
 // ImageRenderer는 containerBackground와 위젯 여백을 그리지 않아서 직접 깐다. 크기는 macOS 위젯 대략값
 let out = URL(fileURLWithPath: CommandLine.arguments[1])
-let loop = Stage(stage: "액관해", substep: "관찰", since: (Date.now.timeIntervalSince1970 - 724) * 1000)
-let hypothesis = Stage(stage: "가설", substep: nil, since: (Date.now.timeIntervalSince1970 - 3725) * 1000)
+let loop = Stage(stage: "액관해", substep: "관찰")
+let hypothesis = Stage(stage: "가설", substep: nil)
 let cases: [(String, Stage?, WidgetFamily, CGSize)] = [
     ("small", loop, .systemSmall, CGSize(width: 170, height: 170)),
     ("small-hypothesis", hypothesis, .systemSmall, CGSize(width: 170, height: 170)),

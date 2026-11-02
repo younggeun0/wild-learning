@@ -66,18 +66,15 @@ private struct StageSummary: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(stage.stage)
-                .font(.system(size: 30, weight: .bold))
+                .font(.system(size: 36, weight: .bold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
                 .foregroundStyle(palette.accent)
                 .widgetAccentable()
             Text(stage.substep ?? " ")
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(palette.text)
             Spacer(minLength: 4)
-            Text(stage.start, style: .timer)
-                .font(.system(size: 26, weight: .semibold).monospacedDigit())
-                .foregroundStyle(palette.text)
-                .lineLimit(1)
-                .minimumScaleFactor(0.6)
             Button(intent: AdvanceIntent()) {
                 Text("다음 →")
                     .font(.system(size: 12, weight: .semibold))

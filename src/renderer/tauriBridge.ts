@@ -10,7 +10,7 @@ export type WildLearningBridge = {
   openGuide(): void
   closeWindow(): void
   resize(width: number, height: number): void
-  // 메뉴 막대 제목과 macOS 위젯. 경과 시간은 Rust가 매초 세고 위젯은 stage.since부터 스스로 센다
+  // 메뉴 막대 제목과 macOS 위젯
   setStage(label: string, stage: Stage): void
 }
 

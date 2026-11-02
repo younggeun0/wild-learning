@@ -51,10 +51,9 @@ function GuideContent() {
         ))}
       </dl>
 
-      <p className="text-[11px] text-stone-400 dark:text-stone-500">
-        큰 숫자는 지금 단계에 들어온 뒤 흐른 시간. 위쪽 줄에 마우스를 올리면 단계별 누적 시간이 보인다.
-        {window.wildLearning && ' 메뉴 막대에도 단계와 시간이 나온다.'}
-      </p>
+      {window.wildLearning && (
+        <p className="text-[11px] text-stone-400 dark:text-stone-500">메뉴 막대에도 지금 단계가 나온다.</p>
+      )}
     </>
   )
 }

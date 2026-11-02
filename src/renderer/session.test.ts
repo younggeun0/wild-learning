@@ -3,14 +3,12 @@ import {
   type Action,
   type Session,
   current,
-  dwell,
   laps,
   newSession,
   parseSession,
   reduce,
   stageLabel,
   stageOf,
-  stageSince,
 } from './session'
 
 const run = (actions: Action[], start = newSession(0)): Session => actions.reduce(reduce, start)
@@ -67,38 +65,13 @@ describe('session', () => {
     expect(run([...nexts(8), { type: 'reset', at: 50 }])).toEqual(newSession(50))
   })
 
-  it('dwell sums time per station, counting the current one up to now', () => {
-    const s = run([
-      { type: 'next', at: 1000 },
-      { type: 'jump', mode: 'option', at: 3000 },
-    ])
-    expect(dwell(s, 3500)).toMatchObject({ option: 1500, hypothesis: 2000, map: 0 })
-  })
-
-  it('stage time keeps running through the action loop and restarts in a new quadrant', () => {
-    const inLoop = run([
-      { type: 'next', at: 10 },
-      { type: 'next', at: 20 },
-      { type: 'next', at: 30 },
-      { type: 'jump', mode: 'action', at: 40 },
-      { type: 'next', at: 50 },
-    ])
-    expect(current(inLoop).mode).toBe('observation')
-    expect(stageSince(inLoop)).toBe(20)
-    expect(stageSince(run(nexts(2)))).toBe(2)
-
-    const onMap = reduce(inLoop, { type: 'jump', mode: 'map', at: 60 })
-    expect(stageSince(onMap)).toBe(60)
-    expect(stageSince(reduce(onMap, { type: 'undo' }))).toBe(20)
-  })
-
   it('the stage shown outside the widget names the quadrant, and the station only inside the loop', () => {
     const onHypothesis = run(nexts(1))
-    expect(stageOf(onHypothesis)).toEqual({ mode: 'hypothesis', stage: '가설', substep: null, since: 1 })
+    expect(stageOf(onHypothesis)).toEqual({ mode: 'hypothesis', stage: '가설', substep: null })
     expect(stageLabel(stageOf(onHypothesis))).toBe('가설')
 
     const onObservation = run(nexts(3))
-    expect(stageOf(onObservation)).toEqual({ mode: 'observation', stage: '액관해', substep: '관찰', since: 2 })
+    expect(stageOf(onObservation)).toEqual({ mode: 'observation', stage: '액관해', substep: '관찰' })
     expect(stageLabel(stageOf(onObservation))).toBe('액관해·관찰')
   })
 
