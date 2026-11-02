@@ -57,6 +57,13 @@ export function reduce(s: Session, a: Action): Session {
 export const laps = (s: Session): number =>
   s.visits.filter((v, i) => i > 0 && v.mode === 'option' && s.visits[i - 1].mode === 'map').length
 
+export function stageSince(s: Session): number {
+  const quadrant = station(current(s).mode).quadrant
+  let i = s.visits.length - 1
+  while (i > 0 && station(s.visits[i - 1].mode).quadrant === quadrant) i--
+  return s.visits[i].at
+}
+
 export function dwell(s: Session, now: number): Record<Mode, number> {
   const total = Object.fromEntries(STATIONS.map((st) => [st.mode, 0])) as Record<Mode, number>
   s.visits.forEach((v, i) => {

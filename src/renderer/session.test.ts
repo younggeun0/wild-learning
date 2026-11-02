@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { type Action, type Session, current, dwell, laps, newSession, parseSession, reduce } from './session'
+import {
+  type Action,
+  type Session,
+  current,
+  dwell,
+  laps,
+  newSession,
+  parseSession,
+  reduce,
+  stageSince,
+} from './session'
 
 const run = (actions: Action[], start = newSession(0)): Session => actions.reduce(reduce, start)
 const nexts = (n: number, from = 1): Action[] => Array.from({ length: n }, (_, i) => ({ type: 'next', at: from + i }))
@@ -61,6 +71,23 @@ describe('session', () => {
       { type: 'jump', mode: 'option', at: 3000 },
     ])
     expect(dwell(s, 3500)).toMatchObject({ option: 1500, hypothesis: 2000, map: 0 })
+  })
+
+  it('stage time keeps running through the action loop and restarts in a new quadrant', () => {
+    const inLoop = run([
+      { type: 'next', at: 10 },
+      { type: 'next', at: 20 },
+      { type: 'next', at: 30 },
+      { type: 'jump', mode: 'action', at: 40 },
+      { type: 'next', at: 50 },
+    ])
+    expect(current(inLoop).mode).toBe('observation')
+    expect(stageSince(inLoop)).toBe(20)
+    expect(stageSince(run(nexts(2)))).toBe(2)
+
+    const onMap = reduce(inLoop, { type: 'jump', mode: 'map', at: 60 })
+    expect(stageSince(onMap)).toBe(60)
+    expect(stageSince(reduce(onMap, { type: 'undo' }))).toBe(20)
   })
 
   it('parses only well-formed stored sessions', () => {
