@@ -42,8 +42,9 @@ async function drawBadge(label: string): Promise<number[]> {
   ctx.font = font
   ctx.fillStyle = '#ffffff'
   ctx.textAlign = 'center'
-  ctx.textBaseline = 'middle'
-  ctx.fillText(label, canvas.width / 2, height / 2 + scale)
+  // middle 기준선은 글꼴마다 위아래가 어긋나서, 실제 글자 상자를 재서 가운데에 놓는다
+  const { actualBoundingBoxAscent: ascent, actualBoundingBoxDescent: descent } = ctx.measureText(label)
+  ctx.fillText(label, canvas.width / 2, (height + ascent - descent) / 2)
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'))
   if (!blob) throw new Error('badge render failed')
   return Array.from(new Uint8Array(await blob.arrayBuffer()))
