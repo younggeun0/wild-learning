@@ -12,6 +12,12 @@
 - macOS 알림센터 위젯(작게·중간, macOS 14 이상)에서도 지금 단계를 보고 `다음 →`으로 넘긴다. 위젯은 앱이 켜져 있을 때만 단계를 보여 주고, 앱을 끄면 "앱을 실행해 주세요"로 바뀐다
 - 위젯은 기본으로 항상 위에 떠 있고, 상단을 끌어 옮기고 우하단 손잡이로 크기를 바꾼다 (최소 200×90). 높이 170px, 너비 240px보다 작아지면 네 칸짜리 한 줄 트랙으로 바뀐다
 
+### 설치
+
+[Releases](https://github.com/younggeun0/wild-learning/releases)에서 `wild-learning_<버전>_arm64.dmg`를 받아 `wild-learning.app`을 Applications로 옮긴다. Finder와 메뉴에는 `야생학습`으로 보인다. 공증하지 않은 빌드라면 처음 열 때 Gatekeeper가 막으므로, 시스템 설정 > 개인정보 보호 및 보안에서 "그래도 열기"를 누른다.
+
+알림센터 위젯은 앱을 한 번 실행한 뒤 알림센터 아래의 "위젯 편집"에서 `야생학습`을 찾아 추가한다.
+
 ### 단축키
 
 | 단축키 | 설명 |
@@ -36,4 +42,7 @@ npm run build:web  # 웹앱을 dist에 빌드 (Vercel용, npx vite preview로 �
 
 웹앱은 같은 renderer를 Tauri 브리지 없이 띄운다. `window.wildLearning`이 없으면 전역 단축키·창 크기 손잡이·메뉴 막대 표시 없이 동작한다.
 
-알림센터 위젯은 `widget/`의 WidgetKit 확장이다. 앱과 앱 그룹 컨테이너의 `stage.json`(지금 단계)과 `requests/*.advance`(다음 버튼 요청)로 주고받는다. 확장이 들어 있지 않은 `npm run dev` 빌드에서는 이 연동이 꺼진다.
+알림센터 위젯은 `widget/`의 WidgetKit 확장이다. 앱과 앱 그룹 컨테이너의 `stage.json`(지금 단계)과 `requests/*.advance`(다음 버튼 요청)로 주고받는다. 확장이 들어 있지 않은 `npm run dev` 빌드에서는 이 연동이 꺼진다. 알림센터에 올리지 않고 위젯 모양만 볼 때는 `scripts/render-widget.sh`가 `.verify/widget-*.png`로 그려 준다.
+
+- 앱 묶음 파일 이름(`productName`)은 영문 `wild-learning`으로 둔다. 경로에 한글이 들어가면 ExtensionKit이 위젯 확장을 찾지 못해 위젯이 갱신되지 않는다. 보이는 이름 `야생학습`은 `src-tauri/Info.plist`와 `src-tauri/InfoPlist.strings`가 정한다
+- 앱 아이콘 원본은 `scripts/icon.html`이다. 파일 안 주석대로 1024px PNG를 만들고 `npx tauri icon`으로 `src-tauri/icons`를 다시 만든다
