@@ -10,7 +10,7 @@ const MEANING: Record<Quadrant, string> = {
 
 const CONTROLS: [key: string, does: string, desktopOnly?: boolean][] = [
   ['Space', '다음 단계'],
-  ['Backspace', '되돌리기'],
+  ['⇧Space', '되돌리기'],
   ['칸 클릭', '그 단계로 이동 (액션·관찰·해석도)'],
   ['⌘⇧Space', '다른 앱에서도 다음 단계', true],
   ['↺', '새 세션'],

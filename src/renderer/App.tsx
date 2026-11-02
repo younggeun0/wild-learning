@@ -67,14 +67,12 @@ export default function App() {
       }
       if (guideOpen) {
         if (event.key === 'Escape') setGuideOpen(false)
-        else if (event.key !== ' ' && event.key !== 'Backspace') return
+        else if (event.key !== ' ') return
         event.preventDefault()
         return
       }
-      if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey || event.repeat) return
-      if (event.key === ' ') dispatch({ type: 'next', at: Date.now() })
-      else if (event.key === 'Backspace') dispatch({ type: 'undo' })
-      else return
+      if (event.key !== ' ' || event.metaKey || event.ctrlKey || event.altKey || event.repeat) return
+      dispatch(event.shiftKey ? { type: 'undo' } : { type: 'next', at: Date.now() })
       event.preventDefault()
     }
     window.addEventListener('keydown', onKeyDown)
@@ -87,7 +85,7 @@ export default function App() {
   const stage = useMemo(() => stageOf(session), [session])
   const label = stageLabel(stage)
 
-  useEffect(() => window.wildLearning?.setStage(label, stage), [label, stage])
+  useEffect(() => window.wildLearning?.setStage(stage), [stage])
 
   return (
     <main className="group/widget fixed inset-0 flex flex-col overflow-hidden rounded-xl bg-stone-50 text-stone-600 dark:bg-stone-900 dark:text-stone-300">

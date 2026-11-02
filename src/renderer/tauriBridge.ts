@@ -11,7 +11,7 @@ export type WildLearningBridge = {
   closeWindow(): void
   resize(width: number, height: number): void
   // 메뉴 막대 제목과 macOS 위젯
-  setStage(label: string, stage: Stage): void
+  setStage(stage: Stage): void
 }
 
 declare global {
@@ -66,9 +66,10 @@ if (window.__TAURI_INTERNALS__) {
     closeWindow() {
       getCurrentWindow().close().catch(console.error)
     },
-    setStage(label, stage) {
+    setStage(stage) {
       const id = ++latestStage
-      drawBadge(label)
+      // 액관해 안에서는 지금 정거장(액션·관찰·해석)만 보인다
+      drawBadge(stage.substep ?? stage.stage)
         .then((badge) => {
           if (id === latestStage) return invoke('set_stage', { badge, stage })
         })
