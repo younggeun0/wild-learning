@@ -1,42 +1,42 @@
 import { Fragment } from 'react'
-import {
-  COLS,
-  type Mode,
-  QUADRANTS,
-  type Quadrant,
-  ROWS,
-  STATIONS,
-  type Station,
-  nextStation,
-  station,
-} from './session'
+import { COLS, type Mode, QUADRANTS, type Quadrant, ROWS, type Station, nextStation, station, stepsOf } from './session'
 
 type JumpProps = { here: Station; onJump: (mode: Mode) => void }
 
-function Cell({ quadrant, here, onJump }: JumpProps & { quadrant: Quadrant }) {
+const QUADRANT_ORDER = Object.keys(QUADRANTS) as Quadrant[]
+
+function Cell({ quadrant, here, elapsed, onJump }: JumpProps & { quadrant: Quadrant; elapsed: string }) {
   const { label, row, col } = QUADRANTS[quadrant]
   const active = here.quadrant === quadrant
-  const steps = STATIONS.filter((st) => st.quadrant === quadrant)
+  const steps = stepsOf(quadrant)
   return (
     <div
       data-quadrant={quadrant}
       onClick={() => onJump(active ? here.mode : steps[0].mode)}
       style={{ gridRow: ROWS.indexOf(row) + 1, gridColumn: COLS.indexOf(col) + 2 }}
-      className={`flex min-w-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg transition-colors duration-300 ${
+      className={`flex min-w-0 cursor-pointer flex-col items-center justify-center gap-[1.2vmin] rounded-lg transition-colors duration-300 ${
         active ? 'bg-accent text-white' : 'bg-stone-100 text-stone-400 dark:bg-stone-800 dark:text-stone-500'
       }`}
     >
       <span
         className={
           active
-            ? 'text-[clamp(20px,14vmin,64px)] leading-none font-bold'
+            ? 'text-[clamp(16px,12vmin,56px)] leading-none font-bold'
             : 'text-[clamp(12px,5vmin,26px)] leading-tight font-semibold'
         }
       >
-        {active ? here.label : label}
+        {label}
       </span>
+      {active && (
+        <span
+          data-testid="stage-time"
+          className="text-[clamp(12px,7.5vmin,36px)] leading-none font-semibold tabular-nums"
+        >
+          {elapsed}
+        </span>
+      )}
       {steps.length > 1 && (
-        <span className="flex gap-1 text-[clamp(9px,3vmin,13px)]">
+        <span className="flex gap-1 text-[clamp(9px,3vmin,13px)] leading-none">
           {steps.map((st, i) => (
             <Fragment key={st.mode}>
               {i > 0 && <span className="opacity-60">·</span>}
@@ -58,7 +58,7 @@ function Cell({ quadrant, here, onJump }: JumpProps & { quadrant: Quadrant }) {
   )
 }
 
-function Grid({ here, onJump }: JumpProps) {
+function Grid({ here, elapsed, onJump }: JumpProps & { elapsed: string }) {
   const axis = 'flex items-center justify-center text-[10px] text-stone-400 dark:text-stone-500'
   return (
     <div className="grid min-h-0 flex-1 grid-cols-[14px_1fr_1fr] grid-rows-[1fr_1fr_14px] gap-1 compact:hidden">
@@ -76,39 +76,45 @@ function Grid({ here, onJump }: JumpProps) {
           {col}
         </span>
       ))}
-      {(Object.keys(QUADRANTS) as Quadrant[]).map((q) => (
-        <Cell key={q} quadrant={q} here={here} onJump={onJump} />
+      {QUADRANT_ORDER.map((q) => (
+        <Cell key={q} quadrant={q} here={here} elapsed={elapsed} onJump={onJump} />
       ))}
     </div>
   )
 }
 
 function Strip({ here, onJump }: JumpProps) {
-  const reached = STATIONS.indexOf(here)
+  const reached = QUADRANT_ORDER.indexOf(here.quadrant)
   return (
     <div className="hidden min-h-0 flex-1 items-center px-1.5 compact:flex">
-      <div className="flex w-full items-end gap-1">
-        {STATIONS.map((st, i) => {
-          const on = st === here
+      <div className="flex w-full items-start gap-1">
+        {QUADRANT_ORDER.map((q, i) => {
+          const on = q === here.quadrant
+          const steps = stepsOf(q)
           return (
             <div
-              key={st.mode}
-              data-mode={st.mode}
-              onClick={() => onJump(st.mode)}
-              className="flex min-w-0 flex-1 cursor-pointer flex-col gap-1"
+              key={q}
+              data-quadrant={q}
+              onClick={() => onJump(on ? here.mode : steps[0].mode)}
+              className="flex min-w-0 flex-1 cursor-pointer flex-col items-center gap-1"
             >
-              <div
-                className={`rounded-full transition-all duration-300 ${
-                  on ? 'h-3.5 bg-accent' : i < reached ? 'h-2 bg-accent/35' : 'h-2 bg-stone-200 dark:bg-stone-700'
-                }`}
-              />
+              <div className="flex h-3.5 w-full items-center">
+                <div
+                  className={`w-full rounded-full transition-all duration-300 ${
+                    on ? 'h-3.5 bg-accent' : i < reached ? 'h-2 bg-accent/35' : 'h-2 bg-stone-200 dark:bg-stone-700'
+                  }`}
+                />
+              </div>
               <span
-                className={`text-center text-[11px] leading-none ${
+                className={`text-[11px] leading-none ${
                   on ? 'font-bold text-stone-800 dark:text-stone-100' : 'text-stone-400 dark:text-stone-500'
                 }`}
               >
-                {st.label}
+                {QUADRANTS[q].label}
               </span>
+              {on && steps.length > 1 && (
+                <span className="-mt-0.5 text-[9px] leading-none text-accent">{here.label}</span>
+              )}
             </div>
           )
         })}
@@ -117,11 +123,19 @@ function Strip({ here, onJump }: JumpProps) {
   )
 }
 
-export default function Board({ mode, onJump }: { mode: Mode; onJump: (mode: Mode) => void }) {
+export default function Board({
+  mode,
+  elapsed,
+  onJump,
+}: {
+  mode: Mode
+  elapsed: string
+  onJump: (mode: Mode) => void
+}) {
   const here = station(mode)
   return (
     <div className="flex h-full flex-col gap-1">
-      <Grid here={here} onJump={onJump} />
+      <Grid here={here} elapsed={elapsed} onJump={onJump} />
       <Strip here={here} onJump={onJump} />
       <p className="shrink-0 text-center text-[11px] leading-none text-stone-400 dark:text-stone-500">
         Space → <b className="font-semibold text-stone-700 dark:text-stone-200">{nextStation(mode).label}</b>

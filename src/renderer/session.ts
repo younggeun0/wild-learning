@@ -8,7 +8,7 @@ export const COLS = ['분산', '집중'] as const
 export const QUADRANTS: Record<Quadrant, { label: string; row: (typeof ROWS)[number]; col: (typeof COLS)[number] }> = {
   option: { label: '옵션', row: '미래', col: '분산' },
   hypothesis: { label: '가설', row: '미래', col: '집중' },
-  loop: { label: '실행 루프', row: '과거·현재', col: '집중' },
+  loop: { label: '액관해', row: '과거·현재', col: '집중' },
   map: { label: '지도', row: '과거·현재', col: '분산' },
 }
 
@@ -37,6 +37,13 @@ export const newSession = (at: number): Session => ({ visits: [{ mode: 'option',
 export const current = (s: Session): Visit => s.visits[s.visits.length - 1]
 
 export const station = (mode: Mode): Station => STATIONS.find((st) => st.mode === mode)!
+
+export const stepsOf = (quadrant: Quadrant): Station[] => STATIONS.filter((st) => st.quadrant === quadrant)
+
+export function stageLabel(mode: Mode): string {
+  const { quadrant, label } = station(mode)
+  return stepsOf(quadrant).length > 1 ? `${QUADRANTS[quadrant].label}·${label}` : label
+}
 
 export const nextStation = (mode: Mode): Station =>
   STATIONS[(STATIONS.findIndex((st) => st.mode === mode) + 1) % STATIONS.length]
