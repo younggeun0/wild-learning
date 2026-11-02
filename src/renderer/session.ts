@@ -5,14 +5,11 @@ export type Quadrant = 'option' | 'hypothesis' | 'loop' | 'map'
 export const ROWS = ['미래', '과거·현재'] as const
 export const COLS = ['분산', '집중'] as const
 
-export const QUADRANTS: Record<
-  Quadrant,
-  { label: string; row: (typeof ROWS)[number]; col: (typeof COLS)[number]; color: string }
-> = {
-  option: { label: '옵션', row: '미래', col: '분산', color: '#0ea5e9' },
-  hypothesis: { label: '가설', row: '미래', col: '집중', color: '#8b5cf6' },
-  loop: { label: '실행 루프', row: '과거·현재', col: '집중', color: '#f59e0b' },
-  map: { label: '지도', row: '과거·현재', col: '분산', color: '#10b981' },
+export const QUADRANTS: Record<Quadrant, { label: string; row: (typeof ROWS)[number]; col: (typeof COLS)[number] }> = {
+  option: { label: '옵션', row: '미래', col: '분산' },
+  hypothesis: { label: '가설', row: '미래', col: '집중' },
+  loop: { label: '실행 루프', row: '과거·현재', col: '집중' },
+  map: { label: '지도', row: '과거·현재', col: '분산' },
 }
 
 export type Station = { mode: Mode; label: string; quadrant: Quadrant }

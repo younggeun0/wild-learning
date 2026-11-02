@@ -1,19 +1,29 @@
 import { Fragment } from 'react'
-import { COLS, type Mode, QUADRANTS, type Quadrant, ROWS, STATIONS, type Station, nextStation, station } from './session'
+import {
+  COLS,
+  type Mode,
+  QUADRANTS,
+  type Quadrant,
+  ROWS,
+  STATIONS,
+  type Station,
+  nextStation,
+  station,
+} from './session'
 
 type JumpProps = { here: Station; onJump: (mode: Mode) => void }
 
 function Cell({ quadrant, here, onJump }: JumpProps & { quadrant: Quadrant }) {
-  const { label, row, col, color } = QUADRANTS[quadrant]
+  const { label, row, col } = QUADRANTS[quadrant]
   const active = here.quadrant === quadrant
   const steps = STATIONS.filter((st) => st.quadrant === quadrant)
   return (
     <div
       data-quadrant={quadrant}
       onClick={() => onJump(active ? here.mode : steps[0].mode)}
-      style={{ gridRow: ROWS.indexOf(row) + 1, gridColumn: COLS.indexOf(col) + 2, backgroundColor: active ? color : undefined }}
+      style={{ gridRow: ROWS.indexOf(row) + 1, gridColumn: COLS.indexOf(col) + 2 }}
       className={`flex min-w-0 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg transition-colors duration-300 ${
-        active ? 'text-white' : 'bg-stone-100 text-stone-400 dark:bg-stone-800 dark:text-stone-500'
+        active ? 'bg-accent text-white' : 'bg-stone-100 text-stone-400 dark:bg-stone-800 dark:text-stone-500'
       }`}
     >
       <span
@@ -88,8 +98,9 @@ function Strip({ here, onJump }: JumpProps) {
               className="flex min-w-0 flex-1 cursor-pointer flex-col gap-1"
             >
               <div
-                style={{ backgroundColor: i <= reached ? QUADRANTS[st.quadrant].color : undefined }}
-                className={`rounded-full bg-stone-200 transition-all duration-300 dark:bg-stone-700 ${on ? 'h-3.5' : 'h-2'}`}
+                className={`rounded-full transition-all duration-300 ${
+                  on ? 'h-3.5 bg-accent' : i < reached ? 'h-2 bg-accent/35' : 'h-2 bg-stone-200 dark:bg-stone-700'
+                }`}
               />
               <span
                 className={`text-center text-[11px] leading-none ${

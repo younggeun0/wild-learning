@@ -1,6 +1,16 @@
 @import 'tailwindcss';
 @import './pretendard-regular-subset.css';
 
+@theme {
+  --color-accent: #3a8f5c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-accent: #4fae78;
+  }
+}
+
 @custom-variant compact {
   @media (max-height: 169px), (max-width: 239px) {
     @slot;
