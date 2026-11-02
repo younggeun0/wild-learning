@@ -11,7 +11,7 @@ if [ -z "$identity" ]; then
   exit 1
 fi
 
-app=src-tauri/target/release/bundle/macos/야생학습.app
+app=src-tauri/target/release/bundle/macos/wild-learning.app
 appex=src-tauri/target/widget/Build/Products/Release/WildLearningWidget.appex
 dmg=src-tauri/target/release/bundle/dmg/wild-learning_${version}_$(uname -m).dmg
 

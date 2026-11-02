@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- 묶음 파일 이름은 wild-learning.app으로 둔다. 경로에 한글이 들어가면 ExtensionKit이 위젯 확장을 LS 데이터베이스에서 찾지 못한다.
+     사람에게 보이는 이름만 야생학습으로 바꾸고, Finder는 InfoPlist.strings로 바꿔 보여 준다 -->
+<plist version="1.0">
+<dict>
+	<key>CFBundleName</key>
+	<string>야생학습</string>
+	<key>CFBundleDisplayName</key>
+	<string>야생학습</string>
+	<key>LSHasLocalizedDisplayName</key>
+	<true/>
+</dict>
+</plist>
