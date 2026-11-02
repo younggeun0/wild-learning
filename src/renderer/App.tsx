@@ -1,7 +1,7 @@
 import { useEffect, useReducer, useState } from 'react'
 import './App.css'
 import Board from './Board'
-import Guide from './Guide'
+import { GuideOverlay } from './Guide'
 import ResizeHandle from './ResizeHandle'
 import {
   STATIONS,
@@ -19,12 +19,20 @@ import {
 const STORAGE_KEY = 'wild-learning.session'
 const GUIDE_SEEN_KEY = 'wild-learning.guide-seen'
 
-function guideSeen(): boolean {
+function firstGuide(): boolean {
   try {
-    return localStorage.getItem(GUIDE_SEEN_KEY) !== null
-  } catch {
+    if (localStorage.getItem(GUIDE_SEEN_KEY) !== null) return false
+    localStorage.setItem(GUIDE_SEEN_KEY, '1')
     return true
+  } catch {
+    return false
   }
+}
+
+// 데스크톱은 작은 위젯 대신 따로 창을 띄운다
+function showGuide(openOverlay: () => void) {
+  if (window.wildLearning) window.wildLearning.openGuide()
+  else openOverlay()
 }
 
 function load(): Session {
@@ -53,7 +61,7 @@ function useNow() {
 export default function App() {
   const [session, dispatch] = useReducer(reduce, undefined, load)
   const now = useNow()
-  const [guideOpen, setGuideOpen] = useState(() => !guideSeen())
+  const [guideOpen, setGuideOpen] = useState(false)
 
   useEffect(() => {
     try {
@@ -64,18 +72,14 @@ export default function App() {
   }, [session])
 
   useEffect(() => {
-    if (!guideOpen) return
-    try {
-      localStorage.setItem(GUIDE_SEEN_KEY, '1')
-    } catch {
-      /* 못 남기면 다음에 또 열릴 뿐이다 */
-    }
-  }, [guideOpen])
+    if (firstGuide()) showGuide(() => setGuideOpen(true))
+  }, [])
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === '?' && !event.metaKey && !event.ctrlKey && !event.altKey && !event.repeat) {
-        setGuideOpen((open) => !open)
+        if (guideOpen) setGuideOpen(false)
+        else showGuide(() => setGuideOpen(true))
         event.preventDefault()
         return
       }
@@ -131,7 +135,7 @@ export default function App() {
           className="cursor-pointer rounded px-1 text-stone-400 hover:text-stone-700 dark:text-stone-500 dark:hover:text-stone-200"
           onClick={(event) => {
             event.currentTarget.blur()
-            setGuideOpen(true)
+            showGuide(() => setGuideOpen(true))
           }}
         >
           ?
@@ -152,7 +156,7 @@ export default function App() {
         <Board mode={here.mode} elapsed={elapsed} onJump={(mode) => dispatch({ type: 'jump', mode, at: Date.now() })} />
       </div>
       {window.wildLearning && <ResizeHandle />}
-      {guideOpen && <Guide onClose={() => setGuideOpen(false)} />}
+      {guideOpen && <GuideOverlay onClose={() => setGuideOpen(false)} />}
     </main>
   )
 }
