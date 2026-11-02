@@ -125,6 +125,13 @@ fn main() {
             spawn_ticker(app.handle().clone());
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application")
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|app, event| {
+            if let tauri::RunEvent::Exit = event {
+                if let Some(widget) = app.state::<Option<Widget>>().inner() {
+                    widget.clear();
+                }
+            }
+        })
 }

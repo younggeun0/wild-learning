@@ -48,6 +48,12 @@ impl Widget {
         Ok(())
     }
 
+    // 앱이 꺼지면 위젯은 시간을 멈추고 "앱을 실행해 주세요"를 보인다. 다시 켜면 renderer가 set_stage로 새로 쓴다
+    pub fn clear(&self) {
+        let _ = fs::remove_file(self.container.join("stage.json"));
+        unsafe { wl_reload_widgets() };
+    }
+
     // 위젯의 다음 버튼(widget/Sources/AdvanceIntent.swift)이 남긴 요청을 지운 만큼 센다.
     // 지우기는 한 번만 성공하므로 요청 하나가 두 번 넘기는 일은 없다
     pub fn take_advance_requests(&self) -> usize {

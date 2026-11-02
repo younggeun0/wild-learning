@@ -6,7 +6,7 @@ enum AppGroup {
     static var container: URL? { FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: id) }
 }
 
-// 앱(src-tauri/src/widget.rs)이 단계가 바뀔 때마다 쓰는 stage.json
+// 앱(src-tauri/src/widget.rs)이 단계가 바뀔 때마다 쓰고, 꺼질 때 지우는 stage.json
 struct Stage: Decodable, Equatable {
     let stage: String
     let substep: String?
