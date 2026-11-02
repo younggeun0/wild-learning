@@ -1,0 +1,13 @@
+@import 'tailwindcss';
+@import './pretendard-regular-subset.css';
+
+body {
+  margin: 0;
+  font-family: 'Pretendard', sans-serif;
+  overflow: hidden;
+  user-select: none;
+}
+
+#root {
+  height: 100vh;
+}
