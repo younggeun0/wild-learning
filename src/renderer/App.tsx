@@ -1,6 +1,7 @@
 import { useEffect, useReducer, useState } from 'react'
 import './App.css'
 import Board from './Board'
+import Guide from './Guide'
 import ResizeHandle from './ResizeHandle'
 import {
   STATIONS,
@@ -16,6 +17,15 @@ import {
 } from './session'
 
 const STORAGE_KEY = 'wild-learning.session'
+const GUIDE_SEEN_KEY = 'wild-learning.guide-seen'
+
+function guideSeen(): boolean {
+  try {
+    return localStorage.getItem(GUIDE_SEEN_KEY) !== null
+  } catch {
+    return true
+  }
+}
 
 function load(): Session {
   try {
@@ -43,6 +53,7 @@ function useNow() {
 export default function App() {
   const [session, dispatch] = useReducer(reduce, undefined, load)
   const now = useNow()
+  const [guideOpen, setGuideOpen] = useState(() => !guideSeen())
 
   useEffect(() => {
     try {
@@ -53,7 +64,27 @@ export default function App() {
   }, [session])
 
   useEffect(() => {
+    if (!guideOpen) return
+    try {
+      localStorage.setItem(GUIDE_SEEN_KEY, '1')
+    } catch {
+      /* 못 남기면 다음에 또 열릴 뿐이다 */
+    }
+  }, [guideOpen])
+
+  useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === '?' && !event.metaKey && !event.ctrlKey && !event.altKey && !event.repeat) {
+        setGuideOpen((open) => !open)
+        event.preventDefault()
+        return
+      }
+      if (guideOpen) {
+        if (event.key === 'Escape') setGuideOpen(false)
+        else if (event.key !== ' ' && event.key !== 'Backspace') return
+        event.preventDefault()
+        return
+      }
       if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey || event.repeat) return
       if (event.key === ' ') dispatch({ type: 'next', at: Date.now() })
       else if (event.key === 'Backspace') dispatch({ type: 'undo' })
@@ -62,7 +93,7 @@ export default function App() {
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
+  }, [guideOpen])
 
   useEffect(() => window.wildLearning?.onAdvance(() => dispatch({ type: 'next', at: Date.now() })), [])
 
@@ -96,6 +127,17 @@ export default function App() {
         <div data-tauri-drag-region className="flex-1 self-stretch" />
         <button
           type="button"
+          title="사용법 (?)"
+          className="cursor-pointer rounded px-1 text-stone-400 hover:text-stone-700 dark:text-stone-500 dark:hover:text-stone-200"
+          onClick={(event) => {
+            event.currentTarget.blur()
+            setGuideOpen(true)
+          }}
+        >
+          ?
+        </button>
+        <button
+          type="button"
           title="새 세션 (기록 지우기)"
           className="cursor-pointer rounded px-1 text-stone-400 hover:text-stone-700 dark:text-stone-500 dark:hover:text-stone-200"
           onClick={(event) => {
@@ -110,6 +152,7 @@ export default function App() {
         <Board mode={here.mode} elapsed={elapsed} onJump={(mode) => dispatch({ type: 'jump', mode, at: Date.now() })} />
       </div>
       {window.wildLearning && <ResizeHandle />}
+      {guideOpen && <Guide onClose={() => setGuideOpen(false)} />}
     </main>
   )
 }
