@@ -1,6 +1,7 @@
 import { useEffect, useReducer, useState } from 'react'
 import './App.css'
 import Board from './Board'
+import ResizeHandle from './ResizeHandle'
 import { STATIONS, type Session, current, dwell, laps, newSession, parseSession, reduce, station } from './session'
 
 const STORAGE_KEY = 'wild-learning.session'
@@ -52,12 +53,14 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [])
 
+  useEffect(() => window.wildLearning?.onAdvance(() => dispatch({ type: 'next', at: Date.now() })), [])
+
   const here = current(session)
   const totals = dwell(session, now)
 
   return (
-    <main className="fixed inset-0 flex flex-col overflow-hidden rounded-xl bg-stone-50 text-stone-600">
-      <header className="flex h-6 shrink-0 items-center gap-2 px-2.5 text-[11px] tabular-nums">
+    <main className="group/widget fixed inset-0 flex flex-col overflow-hidden rounded-xl bg-stone-50 text-stone-600">
+      <header data-tauri-drag-region className="flex h-6 shrink-0 items-center gap-2 px-2.5 text-[11px] tabular-nums">
         <div className="group relative" data-testid="stats">
           <span>
             {laps(session)}바퀴 · {station(here.mode).label} {formatDuration(now - here.at)}
@@ -71,7 +74,7 @@ export default function App() {
             ))}
           </dl>
         </div>
-        <div className="flex-1 self-stretch" />
+        <div data-tauri-drag-region className="flex-1 self-stretch" />
         <button
           type="button"
           title="새 세션 (기록 지우기)"
@@ -87,6 +90,7 @@ export default function App() {
       <div className="min-h-0 flex-1 px-1 pb-1">
         <Board mode={here.mode} onJump={(mode) => dispatch({ type: 'jump', mode, at: Date.now() })} />
       </div>
+      {window.wildLearning && <ResizeHandle />}
     </main>
   )
 }
