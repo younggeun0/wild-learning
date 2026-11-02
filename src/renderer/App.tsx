@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useReducer, useState } from 'react'
+import { useEffect, useMemo, useReducer } from 'react'
 import './App.css'
 import Board from './Board'
-import { GuideOverlay } from './Guide'
+import { onAdvance, openGuide, publishStage } from './desktop'
 import ResizeHandle from './ResizeHandle'
 import {
   type Session,
@@ -27,12 +27,6 @@ function firstGuide(): boolean {
   }
 }
 
-// 데스크톱은 작은 위젯 대신 따로 창을 띄운다
-function showGuide(openOverlay: () => void) {
-  if (window.wildLearning) window.wildLearning.openGuide()
-  else openOverlay()
-}
-
 function load(): Session {
   try {
     return parseSession(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null')) ?? newSession(Date.now())
@@ -43,7 +37,6 @@ function load(): Session {
 
 export default function App() {
   const [session, dispatch] = useReducer(reduce, undefined, load)
-  const [guideOpen, setGuideOpen] = useState(false)
 
   useEffect(() => {
     try {
@@ -54,38 +47,28 @@ export default function App() {
   }, [session])
 
   useEffect(() => {
-    if (firstGuide()) showGuide(() => setGuideOpen(true))
+    if (firstGuide()) openGuide()
   }, [])
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === '?' && !event.metaKey && !event.ctrlKey && !event.altKey && !event.repeat) {
-        if (guideOpen) setGuideOpen(false)
-        else showGuide(() => setGuideOpen(true))
-        event.preventDefault()
-        return
-      }
-      if (guideOpen) {
-        if (event.key === 'Escape') setGuideOpen(false)
-        else if (event.key !== ' ') return
-        event.preventDefault()
-        return
-      }
-      if (event.key !== ' ' || event.metaKey || event.ctrlKey || event.altKey || event.repeat) return
-      dispatch(event.shiftKey ? { type: 'undo' } : { type: 'next', at: Date.now() })
+      if (event.metaKey || event.ctrlKey || event.altKey || event.repeat) return
+      if (event.key === '?') openGuide()
+      else if (event.key === ' ') dispatch(event.shiftKey ? { type: 'undo' } : { type: 'next', at: Date.now() })
+      else return
       event.preventDefault()
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [guideOpen])
+  }, [])
 
-  useEffect(() => window.wildLearning?.onAdvance(() => dispatch({ type: 'next', at: Date.now() })), [])
+  useEffect(() => onAdvance(() => dispatch({ type: 'next', at: Date.now() })), [])
 
   const here = current(session)
   const stage = useMemo(() => stageOf(session), [session])
   const label = stageLabel(stage)
 
-  useEffect(() => window.wildLearning?.setStage(stage), [stage])
+  useEffect(() => publishStage(stage), [stage])
 
   return (
     <main className="group/widget fixed inset-0 flex flex-col overflow-hidden rounded-xl bg-stone-50 text-stone-600 dark:bg-stone-900 dark:text-stone-300">
@@ -100,7 +83,7 @@ export default function App() {
           className="cursor-pointer rounded px-1 text-stone-400 hover:text-stone-700 dark:text-stone-500 dark:hover:text-stone-200"
           onClick={(event) => {
             event.currentTarget.blur()
-            showGuide(() => setGuideOpen(true))
+            openGuide()
           }}
         >
           ?
@@ -120,8 +103,7 @@ export default function App() {
       <div className="min-h-0 flex-1 px-1 pb-1">
         <Board mode={here.mode} onJump={(mode) => dispatch({ type: 'jump', mode, at: Date.now() })} />
       </div>
-      {window.wildLearning && <ResizeHandle />}
-      {guideOpen && <GuideOverlay onClose={() => setGuideOpen(false)} />}
+      <ResizeHandle />
     </main>
   )
 }

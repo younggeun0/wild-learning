@@ -1,4 +1,5 @@
 import { type PointerEvent, useRef } from 'react'
+import { resizeWindow } from './desktop'
 
 // 테두리 없는 투명 창은 OS 가장자리로 크기를 바꿀 수 없다. 둥근 모서리에 잘리지 않게 안쪽으로 띄운다
 export default function ResizeHandle() {
@@ -12,7 +13,7 @@ export default function ResizeHandle() {
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     const start = startRef.current
     if (!start) return
-    window.wildLearning?.resize(start.width + event.screenX - start.x, start.height + event.screenY - start.y)
+    resizeWindow(start.width + event.screenX - start.x, start.height + event.screenY - start.y)
   }
 
   const onPointerUp = () => {

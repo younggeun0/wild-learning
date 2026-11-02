@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { closeWindow } from './desktop'
 import { QUADRANTS, type Quadrant } from './session'
 
 const MEANING: Record<Quadrant, string> = {
@@ -8,11 +9,11 @@ const MEANING: Record<Quadrant, string> = {
   map: '배운 것을 큰 그림으로 정리한다',
 }
 
-const CONTROLS: [key: string, does: string, desktopOnly?: boolean][] = [
+const CONTROLS: [key: string, does: string][] = [
   ['Space', '다음 단계'],
   ['⇧Space', '되돌리기'],
   ['칸 클릭', '그 단계로 이동 (액션·관찰·해석도)'],
-  ['⌘⇧Space', '다른 앱에서도 다음 단계', true],
+  ['⌘⇧Space', '다른 앱에서도 다음 단계'],
   ['↺', '새 세션'],
   ['?', '이 가이드 열고 닫기'],
 ]
@@ -41,7 +42,7 @@ function GuideContent() {
 
       <h2 className={heading}>조작</h2>
       <dl className="mb-2 grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5">
-        {CONTROLS.filter(([, , desktopOnly]) => !desktopOnly || window.wildLearning).map(([key, does]) => (
+        {CONTROLS.map(([key, does]) => (
           <div key={key} className="contents">
             <dt>
               <kbd className="font-sans font-semibold text-accent">{key}</kbd>
@@ -51,44 +52,17 @@ function GuideContent() {
         ))}
       </dl>
 
-      {window.wildLearning && (
-        <p className="text-[11px] text-stone-400 dark:text-stone-500">메뉴 막대에도 지금 단계가 나온다.</p>
-      )}
+      <p className="text-[11px] text-stone-400 dark:text-stone-500">메뉴 막대에도 지금 단계가 나온다.</p>
     </>
   )
 }
 
 const card = 'text-[12px] leading-snug text-stone-600 dark:text-stone-300'
 
-export function GuideOverlay({ onClose }: { onClose: () => void }) {
-  return (
-    <div
-      data-testid="guide"
-      onClick={onClose}
-      className="absolute inset-0 z-20 flex items-center justify-center bg-stone-900/30 p-1.5 dark:bg-black/50"
-    >
-      <section
-        onClick={(event) => event.stopPropagation()}
-        className={`relative max-h-full w-full max-w-[300px] overflow-y-auto rounded-lg bg-white px-3 py-2.5 shadow-lg dark:bg-stone-800 ${card}`}
-      >
-        <button
-          type="button"
-          title="닫기 (Esc)"
-          onClick={onClose}
-          className="absolute top-1.5 right-2 cursor-pointer text-stone-400 hover:text-stone-700 dark:text-stone-500 dark:hover:text-stone-200"
-        >
-          ✕
-        </button>
-        <GuideContent />
-      </section>
-    </div>
-  )
-}
-
 export function GuidePage() {
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' || event.key === '?') window.wildLearning?.closeWindow()
+      if (event.key === 'Escape' || event.key === '?') closeWindow()
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
