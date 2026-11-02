@@ -9,7 +9,7 @@ use tauri::menu::{Menu, MenuItem};
 use tauri::tray::TrayIconBuilder;
 use tauri::{AppHandle, Emitter, Manager, State, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
-use widget::Widget;
+use widget::{Stage, Widget};
 
 const ADVANCE_SHORTCUT: &str = "CmdOrCtrl+Shift+Space";
 const TRAY_ID: &str = "main";
@@ -19,11 +19,11 @@ const TRAY_ID: &str = "main";
 struct TrayStage(Mutex<Option<(String, f64)>>);
 
 #[tauri::command]
-fn set_tray_stage(app: AppHandle, stage: State<TrayStage>, widget: State<Option<Widget>>, label: String, since: f64) {
-    *stage.0.lock().unwrap() = Some((label.clone(), since));
-    refresh_tray(&app, &label, since);
-    if let Some(widget) = widget.inner() {
-        widget.reload();
+fn set_stage(app: AppHandle, tray: State<TrayStage>, widget: State<Option<Widget>>, label: String, stage: Stage) {
+    *tray.0.lock().unwrap() = Some((label.clone(), stage.since));
+    refresh_tray(&app, &label, stage.since);
+    if let Some(Err(error)) = widget.inner().as_ref().map(|widget| widget.publish(&stage)) {
+        eprintln!("widget stage write failed: {error}");
     }
 }
 
@@ -96,7 +96,7 @@ fn main() {
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .manage(TrayStage::default())
         .manage(Widget::detect())
-        .invoke_handler(tauri::generate_handler![set_tray_stage, open_guide])
+        .invoke_handler(tauri::generate_handler![set_stage, open_guide])
         .setup(|app| {
             let registered = app.global_shortcut().on_shortcut(ADVANCE_SHORTCUT, |app, _shortcut, event| {
                 if event.state() == ShortcutState::Pressed {

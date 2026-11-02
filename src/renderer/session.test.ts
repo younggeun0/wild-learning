@@ -8,6 +8,8 @@ import {
   newSession,
   parseSession,
   reduce,
+  stageLabel,
+  stageOf,
   stageSince,
 } from './session'
 
@@ -88,6 +90,16 @@ describe('session', () => {
     const onMap = reduce(inLoop, { type: 'jump', mode: 'map', at: 60 })
     expect(stageSince(onMap)).toBe(60)
     expect(stageSince(reduce(onMap, { type: 'undo' }))).toBe(20)
+  })
+
+  it('the stage shown outside the widget names the quadrant, and the station only inside the loop', () => {
+    const onHypothesis = run(nexts(1))
+    expect(stageOf(onHypothesis)).toEqual({ mode: 'hypothesis', stage: '가설', substep: null, since: 1 })
+    expect(stageLabel(stageOf(onHypothesis))).toBe('가설')
+
+    const onObservation = run(nexts(3))
+    expect(stageOf(onObservation)).toEqual({ mode: 'observation', stage: '액관해', substep: '관찰', since: 2 })
+    expect(stageLabel(stageOf(onObservation))).toBe('액관해·관찰')
   })
 
   it('parses only well-formed stored sessions', () => {

@@ -40,10 +40,6 @@ export const station = (mode: Mode): Station => STATIONS.find((st) => st.mode ==
 
 export const stepsOf = (quadrant: Quadrant): Station[] => STATIONS.filter((st) => st.quadrant === quadrant)
 
-export function stageLabel(mode: Mode): string {
-  const { quadrant, label } = station(mode)
-  return stepsOf(quadrant).length > 1 ? `${QUADRANTS[quadrant].label}·${label}` : label
-}
 
 export const nextStation = (mode: Mode): Station =>
   STATIONS[(STATIONS.findIndex((st) => st.mode === mode) + 1) % STATIONS.length]
@@ -70,6 +66,18 @@ export function stageSince(s: Session): number {
   while (i > 0 && station(s.visits[i - 1].mode).quadrant === quadrant) i--
   return s.visits[i].at
 }
+
+// 메뉴 막대와 macOS 위젯이 보는 지금 단계. Rust가 그대로 stage.json에 쓴다
+export type Stage = { mode: Mode; stage: string; substep: string | null; since: number }
+
+export function stageOf(s: Session): Stage {
+  const { mode } = current(s)
+  const { quadrant, label } = station(mode)
+  const substep = stepsOf(quadrant).length > 1 ? label : null
+  return { mode, stage: QUADRANTS[quadrant].label, substep, since: stageSince(s) }
+}
+
+export const stageLabel = ({ stage, substep }: Stage): string => (substep ? `${stage}·${substep}` : stage)
 
 export function dwell(s: Session, now: number): Record<Mode, number> {
   const total = Object.fromEntries(STATIONS.map((st) => [st.mode, 0])) as Record<Mode, number>

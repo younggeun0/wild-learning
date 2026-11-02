@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import { LogicalSize, getCurrentWindow } from '@tauri-apps/api/window'
+import type { Stage } from './session'
 
 export type WildLearningBridge = {
   // 전역 단축키(src-tauri/src/main.rs)가 보내는 advance 이벤트. 구독 해제 함수를 돌려준다
@@ -9,8 +10,8 @@ export type WildLearningBridge = {
   openGuide(): void
   closeWindow(): void
   resize(width: number, height: number): void
-  // 메뉴 막대 제목. since는 epoch ms이고 경과 시간은 Rust가 매초 센다
-  setTrayStage(label: string, since: number): void
+  // 메뉴 막대 제목과 macOS 위젯. 경과 시간은 Rust가 매초 세고 위젯은 stage.since부터 스스로 센다
+  setStage(label: string, stage: Stage): void
 }
 
 declare global {
@@ -36,8 +37,8 @@ if (window.__TAURI_INTERNALS__) {
     closeWindow() {
       getCurrentWindow().close().catch(console.error)
     },
-    setTrayStage(label, since) {
-      invoke('set_tray_stage', { label, since }).catch(console.error)
+    setStage(label, stage) {
+      invoke('set_stage', { label, stage }).catch(console.error)
     },
   }
 }

@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from 'react'
+import { useEffect, useMemo, useReducer, useState } from 'react'
 import './App.css'
 import Board from './Board'
 import { GuideOverlay } from './Guide'
@@ -13,7 +13,7 @@ import {
   parseSession,
   reduce,
   stageLabel,
-  stageSince,
+  stageOf,
 } from './session'
 
 const STORAGE_KEY = 'wild-learning.session'
@@ -103,11 +103,11 @@ export default function App() {
 
   const here = current(session)
   const totals = dwell(session, now)
-  const label = stageLabel(here.mode)
-  const since = stageSince(session)
-  const elapsed = formatDuration(now - since)
+  const stage = useMemo(() => stageOf(session), [session])
+  const label = stageLabel(stage)
+  const elapsed = formatDuration(now - stage.since)
 
-  useEffect(() => window.wildLearning?.setTrayStage(label, since), [label, since])
+  useEffect(() => window.wildLearning?.setStage(label, stage), [label, stage])
 
   return (
     <main className="group/widget fixed inset-0 flex flex-col overflow-hidden rounded-xl bg-stone-50 text-stone-600 dark:bg-stone-900 dark:text-stone-300">
